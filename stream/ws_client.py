@@ -200,11 +200,14 @@ class WSClient:
         received during this time."""
         if timeout:
             start = time.time()
-            while self.is_open() and time.time() - start < timeout:
-                self.update(timeout=(timeout - time.time() + start))
+            while self.is_open():
+                remain = timeout - (time.time() - start)
+                if remain <= 0:
+                    raise TimeoutError("Timeout was reached")
+                self.update(timeout=remain)
         else:
             while self.is_open():
-                self.update(timeout=None)
+                self.update()
 
     def close(self, **kwargs):
         """
